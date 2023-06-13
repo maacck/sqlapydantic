@@ -1,8 +1,19 @@
 [tool.poetry]
 name = "sqlapydantic"
-version = "0.1.0"
-description = ""
+version = "0.0.1"
+description = "Generate pydantic models from SQLAlchemy models"
 authors = ["maacck <c.mai@madainchina.com>"]
+readme = "README.md"
+homepage = "https://github.com/maacck/sqlapydantic"
+repository = "https://github.com/maacck/sqlapydantic"
+keywords = ["pydantic", "sqlalchemy"]
+packages = [{ include = "sqlapydantic" }]
+include = ["CHANGELOG.md", "README.md"]
+
+[tool.poetry.urls]
+"BUG TRACKER" = "https://github.com/maacck/sqlapydantic/issues"
+
+
 
 [tool.poetry.dependencies]
 python = "^3.8"
