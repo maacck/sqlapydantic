@@ -1,14 +1,14 @@
-import inspect
 import sys
 from collections import defaultdict
 from importlib import import_module
 from textwrap import indent
-from typing import TypeVar, Any, ClassVar, Set
+from typing import Any, ClassVar, Set, TypeVar
 
 from pydantic import BaseModel
-from sqlalchemy.orm import DeclarativeBase, DeclarativeMeta
+from sqlalchemy import inspect
+from sqlalchemy.orm import DeclarativeBase, DeclarativeMeta, Relationship
 
-from sqlapydantic.models import ModelClass, ColumnAttribute
+from sqlapydantic.models import ColumnAttribute, ModelClass
 
 CustomBaseModel = TypeVar("CustomBaseModel", bound=BaseModel)
 
@@ -32,6 +32,9 @@ class Generator(object):
         indentation: str = "    ",
         split_models: bool = False,
         restrict_fields: Set[str] = None,
+        strict_types: bool = False,
+        constraint_str_length: bool = True,
+        constraint_int_length: bool = True,
         **kwargs,
     ):
         self.base_model = base_model
@@ -44,6 +47,9 @@ class Generator(object):
         else:
             self.restrict_fields = {"id", "created_at", "updated_at"}
         self.split_models = split_models
+        self.strict_types = strict_types
+        self.constraint_str_length = constraint_str_length
+        self.constraint_int_length = constraint_int_length
 
     def add_import(self, obj: Any) -> None:
         # Don't store builtin imports
@@ -101,8 +107,7 @@ class Generator(object):
         for model_in in models_ins:
             # Get Columns
             model = ModelClass(
-                name=model_in.__name__,
-                columns=[],
+                name=model_in.__name__, columns=[], relationship_classes=[]
             )
             for column in model_in.__table__.c:
                 model.columns.append(
@@ -114,6 +119,15 @@ class Generator(object):
                     )
                 )
                 self.add_import(column.type.python_type)
+            # Get Relationships
+            # In Roadmap
+            """
+            model_relationships = inspect(model_in).relationships.items()
+            for rel in model_relationships:
+                rel_prop: Relationship = rel[1]
+                model.relationship_classes.append(rel_prop.mapper.class_)
+            """
+            # Split Models
             if self.split_models:
                 model_base = ModelClass(name=f"{model_in.__name__}Base", columns=[])
                 model_create = ModelClass(
@@ -161,22 +175,36 @@ class Generator(object):
                 models.append(model_read)
             else:
                 models.append(model)
-            # Get Relationships
-            """
-            model_relationships = inspect(model_in).relationships.items()
-            for rel in model_relationships:
-                rel_prop: Relationship = rel[1]
-                print(rel_prop.entity.columns)
-            """
 
         return models
 
     def render_column(self, col: ColumnAttribute, manual_optional: bool = False):
+        field_type = ""
         python_type = col.python_type
+        type_name = python_type.__class__.__name__
+        if isinstance(python_type, str) and self.constraint_str_length:
+            if (
+                hasattr(col.orm_column.type, "length")
+                and col.orm_column.type.length is not None
+            ):
+                self.add_literal_import("pydantic", "constr")
+                field_type = " = constr(max_length={})".format(
+                    col.orm_column.type.length
+                )
+        if self.strict_types and type_name in [
+            "int",
+            "str",
+            "bool",
+            "bytes",
+            "float",
+        ]:
+            strict_type = f"Strict{type_name.capitalize()}"
+            self.add_literal_import("pydantic", strict_type)
+            python_type = strict_type
         if col.optional is True or manual_optional is True:
-            python_type = f"Optional[{col.python_type}]"
+            python_type = f"Optional[{python_type}]"
             self.add_literal_import("typing", "Optional")
-        return f"{col.key}: {python_type}"
+        return f"{col.key}: {python_type}{field_type}"
 
     def render_class_declaration(self, model: ModelClass) -> str:
         model_name = self.base_model.__name__

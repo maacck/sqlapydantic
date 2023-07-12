@@ -6,10 +6,11 @@ from sqlalchemy.orm import DeclarativeBase
 
 
 class ColumnAttribute(BaseModel):
-    orm_column: Column
+    orm_column: Optional[Column]
     optional: Optional[bool]
     key: str
     python_type: str
+    is_relationship: Optional[bool] = False
 
     class Config:
         arbitrary_types_allowed = True
@@ -18,7 +19,8 @@ class ColumnAttribute(BaseModel):
 class ModelClass(BaseModel):
     name: str
     columns: List["ColumnAttribute"]
-    parent_class: Any
+    parent_class: Optional[Any] = None
+    relationship_classes: Optional[List[Any]] = []
 
 
 class CustomDeclarativeBase(DeclarativeBase):
