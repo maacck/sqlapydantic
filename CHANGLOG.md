@@ -1,5 +1,10 @@
 
 
+**0.0.3**
+
+- fix incorrect import of `inspect`
+
+
 **0.0.2**
 
 - Support `pydantic` >= 2.0.0

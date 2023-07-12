@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sqlapydantic"
-version = "0.0.2"
+version = "0.0.3"
 description = "Generate pydantic models from SQLAlchemy models"
 authors = ["maacck <c.mai@madainchina.com>"]
 readme = "README.md"

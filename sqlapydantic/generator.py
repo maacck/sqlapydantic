@@ -5,7 +5,9 @@ from textwrap import indent
 from typing import Any, ClassVar, Set, TypeVar
 
 from pydantic import BaseModel
-from sqlalchemy import inspect
+
+# from sqlalchemy import inspect as sa_inspect
+import inspect
 from sqlalchemy.orm import DeclarativeBase, DeclarativeMeta, Relationship
 
 from sqlapydantic.models import ColumnAttribute, ModelClass
