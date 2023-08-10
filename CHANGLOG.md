@@ -1,4 +1,10 @@
 
+**0.0.4**
+
+- fix `constr` as field constraint instead of type constraint
+- add ` = None` to `Optional` fields
+
+
 
 **0.0.3**
 

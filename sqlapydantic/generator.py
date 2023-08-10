@@ -190,9 +190,7 @@ class Generator(object):
                 and col.orm_column.type.length is not None
             ):
                 self.add_literal_import("pydantic", "constr")
-                field_type = " = constr(max_length={})".format(
-                    col.orm_column.type.length
-                )
+                python_type = "constr(max_length={})".format(col.orm_column.type.length)
         if self.strict_types and type_name in [
             "int",
             "str",
@@ -205,6 +203,7 @@ class Generator(object):
             python_type = strict_type
         if col.optional is True or manual_optional is True:
             python_type = f"Optional[{python_type}]"
+            field_type = " = None"
             self.add_literal_import("typing", "Optional")
         return f"{col.key}: {python_type}{field_type}"
 

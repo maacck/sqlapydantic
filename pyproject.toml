@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sqlapydantic"
-version = "0.0.3"
+version = "0.0.4"
 description = "Generate pydantic models from SQLAlchemy models"
 authors = ["maacck <c.mai@madainchina.com>"]
 readme = "README.md"
@@ -18,7 +18,7 @@ include = ["CHANGELOG.md", "README.md"]
 [tool.poetry.dependencies]
 python = "^3.8"
 SQLAlchemy = "^2.0.13"
-pydantic = "2.0.2"
+pydantic = "^2.0.2"
 
 [tool.poetry.dev-dependencies]
 
